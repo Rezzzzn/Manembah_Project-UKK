@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Admin Dashboard</h2>
+<p>Admin Only</p>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+fetch("http://localhost:8080/api/admin/dashboard", {
+  headers: {
+    Authorization: "Bearer " + localStorage.getItem("token")
+  }
+})
+.then(res => res.json())
+.then(data => {
+  if (!data.message) {
+    alert("Akses ditolak")
+    window.location = "index.html"
+  }
+})
+
+function logout() {
+  localStorage.clear()
+  window.location = "index.html"
+}
+</script>
+</body>
+</html>
