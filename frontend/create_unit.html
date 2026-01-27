@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Unit</title>
+</head>
+<body>
+
+<h2>Tambah Unit</h2>
+
+<input id="name" placeholder="Nama Unit"><br><br>
+
+<select id="type">
+  <option value="villa">Villa</option>
+  <option value="guesthouse">Guesthouse</option>
+</select><br><br>
+
+<input id="price" type="number" placeholder="Harga"><br><br>
+
+<textarea id="description" placeholder="Deskripsi"></textarea><br><br>
+
+<input id="alamat" placeholder="Alamat">
+<input id="jumlah_kamar" type="number" placeholder="Jumlah Kamar">
+<textarea id="fasilitas" placeholder="Fasilitas"></textarea>
+<input id="image_url" placeholder="URL Foto">
+
+<button onclick="simpan()">Simpan</button>
+
+<script>
+const token = localStorage.getItem("token");
+
+function simpan() {
+  const name = document.getElementById("name").value;
+  const type = document.getElementById("type").value;
+  const price = document.getElementById("price").value;
+  const description = document.getElementById("description").value;
+
+  fetch("http://localhost:8080/api/admin/accommodations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      name: name,
+      type: type,
+      price: Number(price),
+      description: description
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    console.log(res); // 🔥 WAJIB buat debug
+    if (res.error) {
+      alert(res.error);
+    } else {
+      alert("Unit berhasil ditambahkan");
+      window.location.href = "manage_unit.html";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Gagal menyimpan unit");
+  });
+}
+</script>
+
+
+
+</body>
+</html>

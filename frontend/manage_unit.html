@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Unit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background: #2c7be5;
+      color: #fff;
+    }
+    button {
+      padding: 6px 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      color: #fff;
+    }
+    .edit {
+      background: #f0ad4e;
+    }
+    .delete {
+      background: #d9534f;
+    }
+    .add {
+      background: #28a745;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Manage Unit</h1>
+
+<button class="add" onclick="location.href='create_unit.html'">
+  + Tambah Unit
+</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nama</th>
+      <th>Tipe</th>
+      <th>Harga</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="unitTable"></tbody>
+</table>
+
+<script>
+const token = localStorage.getItem("token");
+
+fetch("http://localhost:8080/api/admin/accommodations", {
+  headers: {
+    "Authorization": "Bearer " + token
+  }
+})
+.then(res => res.json())
+.then(data => {
+  const tbody = document.getElementById("unitTable");
+  tbody.innerHTML = "";
+
+  // ✅ CEGAH ERROR forEach
+  if (!Array.isArray(data)) {
+    console.error("Response bukan array:", data);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;">
+          Data unit tidak tersedia
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // ✅ kalau data kosong
+  if (data.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;">
+          Belum ada unit
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach(unit => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${unit.id}</td>
+        <td>${unit.name}</td>
+        <td>${unit.type}</td>
+        <td>Rp ${unit.price}</td>
+        <td>
+          <button class="edit" onclick="editUnit(${unit.id})">Edit</button>
+          <button class="delete" onclick="deleteUnit(${unit.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+})
+.catch(err => {
+  console.error(err);
+});
+
+function editUnit(id) {
+  window.location.href = "edit_unit.html?id=" + id;
+}
+
+function deleteUnit(id) {
+  if (!confirm("Yakin ingin menghapus unit ini?")) return;
+
+  fetch(`http://localhost:8080/api/admin/accommodations/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Unit berhasil dihapus");
+    location.reload();
+  });
+}
+</script>
+
+
+</body>
+</html>

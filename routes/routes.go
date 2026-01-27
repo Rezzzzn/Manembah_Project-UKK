@@ -47,9 +47,12 @@ func SetupRoutes(r *gin.Engine) {
 			admin.GET("/dashboard", handlers.AdminDashboard)
 
 			// CRUD ACCOMMODATIONS
+			admin.GET("/accommodations", handlers.GetAccommodations) // ← TAMBAH INI
+			admin.GET("/accommodations/:id", handlers.GetAccommodationByID)
 			admin.POST("/accommodations", handlers.CreateAccommodation)
 			admin.PUT("/accommodations/:id", handlers.UpdateAccommodation)
 			admin.DELETE("/accommodations/:id", handlers.DeleteAccommodation)
+
 
 			// MANAGE USERS
 			admin.GET("/users", handlers.GetAllUsers)

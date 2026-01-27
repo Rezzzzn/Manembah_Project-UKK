@@ -34,7 +34,7 @@ async function login() {
     localStorage.setItem("role", data.user.role)
 
     if (data.user.role === "admin") {
-      window.location = "admin.html"
+      window.location = "manage_unit.html"
     } else {
       window.location = "dashboard.html"
     }

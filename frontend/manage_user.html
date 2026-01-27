@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage User</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #2c7be5;
+      color: white;
+    }
+    button {
+      padding: 6px 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-right: 5px;
+    }
+    .edit {
+      background: #f0ad4e;
+      color: #fff;
+    }
+    .delete {
+      background: #d9534f;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Manage User</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nama</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="userTable"></tbody>
+</table>
+
+<script>
+const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("Silakan login terlebih dahulu");
+  window.location.href = "login.html";
+}
+
+// =======================
+// GET ALL USERS
+// =======================
+fetch("http://localhost:8080/api/admin/users", {
+  headers: {
+    "Authorization": "Bearer " + token
+  }
+})
+.then(res => {
+  if (!res.ok) {
+    throw new Error("Unauthorized / Gagal ambil data");
+  }
+  return res.json();
+})
+.then(data => {
+  if (!Array.isArray(data)) {
+    throw new Error("Response bukan array");
+  }
+
+  const tbody = document.getElementById("userTable");
+  tbody.innerHTML = "";
+
+  data.forEach(user => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${user.id}</td>
+        <td>${user.name}</td>
+        <td>${user.email ?? "-"}</td>
+        <td>${user.role}</td>
+        <td>
+          <button class="edit" onclick="editUser(${user.id})">Edit</button>
+          <button class="delete" onclick="deleteUser(${user.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+})
+.catch(err => {
+  console.error(err);
+  alert("Gagal mengambil data user");
+});
+
+// =======================
+// EDIT USER
+// =======================
+function editUser(id) {
+  window.location.href = `update_user.html?id=${id}`;
+}
+
+// =======================
+// DELETE USER
+// =======================
+function deleteUser(id) {
+  if (!confirm("Yakin ingin menghapus user ini?")) return;
+
+  fetch(`http://localhost:8080/api/admin/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message || "User berhasil dihapus");
+    location.reload();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Gagal menghapus user");
+  });
+}
+</script>
+
+</body>
+</html>

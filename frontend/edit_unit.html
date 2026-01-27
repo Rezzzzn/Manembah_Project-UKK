@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Unit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 6px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      border: none;
+      background: #2c7be5;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .back {
+      background: #6c757d;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Edit Unit</h2>
+
+  <input id="name" placeholder="Nama Unit">
+  <select id="type">
+    <option value="villa">Villa</option>
+    <option value="guesthouse">Guesthouse</option>
+  </select>
+  <input id="price" type="number" placeholder="Harga">
+  <textarea id="description" placeholder="Deskripsi"></textarea>
+
+  <button onclick="updateUnit()">Update Unit</button>
+  <button class="back" onclick="back()">Kembali</button>
+</div>
+
+<script>
+const token = localStorage.getItem("token")
+const params = new URLSearchParams(window.location.search)
+const id = params.get("id")
+
+if (!token || !id) {
+  alert("Akses tidak valid")
+  window.location.href = "manage_unit.html"
+}
+
+// =======================
+// GET ACCOMMODATION BY ID
+// =======================
+fetch(`http://localhost:8080/api/admin/accommodations/${id}`, {
+  headers: {
+    Authorization: "Bearer " + token
+  }
+})
+.then(res => {
+  if (!res.ok) throw new Error("Gagal mengambil data unit")
+  return res.json()
+})
+.then(unit => {
+  document.getElementById("name").value = unit.name
+  document.getElementById("type").value = unit.type
+  document.getElementById("price").value = unit.price
+  document.getElementById("description").value = unit.description
+})
+.catch(err => {
+  console.error("LOAD ERROR:", err)
+  alert("Gagal load data unit")
+})
+
+// =======================
+// UPDATE ACCOMMODATION
+// =======================
+function updateUnit() {
+  const payload = {
+    name: document.getElementById("name").value,
+    type: document.getElementById("type").value,
+    price: parseInt(document.getElementById("price").value),
+    description: document.getElementById("description").value
+  }
+
+  fetch(`http://localhost:8080/api/admin/accommodations/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Gagal update unit")
+    return res.json()
+  })
+  .then(() => {
+    alert("Unit berhasil diupdate")
+    window.location.href = "manage_unit.html"
+  })
+  .catch(err => {
+    console.error("UPDATE ERROR:", err)
+    alert("Update unit gagal")
+  })
+}
+
+function back() {
+  window.location.href = "manage_unit.html"
+}
+</script>
+
+</body>
+</html>

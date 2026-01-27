@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit User</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 6px;
+    }
+    h2 {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      background: #2c7be5;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .back {
+      background: #6c757d;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Edit User</h2>
+
+  <form id="editForm">
+    <label>Nama</label>
+    <input type="text" id="name" required>
+
+    <label>Email</label>
+    <input type="email" id="email" disabled>
+
+    <label>Role</label>
+    <select id="role">
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <button type="submit">Update User</button>
+    <button type="button" class="back" onclick="back()">Kembali</button>
+  </form>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const params = new URLSearchParams(window.location.search);
+const userId = params.get("id");
+
+if (!token || !userId) {
+  alert("Akses tidak valid");
+  window.location.href = "manage_user.html";
+}
+
+// =======================
+// GET USER BY ID
+// =======================
+fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+  headers: {
+    "Authorization": "Bearer " + token
+  }
+})
+.then(res => res.json())
+.then(user => {
+  document.getElementById("name").value = user.name;
+  document.getElementById("email").value = user.email ?? "-";
+  document.getElementById("role").value = user.role;
+})
+.catch(err => {
+  console.error(err);
+  alert("Gagal mengambil data user");
+});
+
+// =======================
+// UPDATE USER
+// =======================
+document.getElementById("editForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const payload = {
+    name: document.getElementById("name").value,
+    role: document.getElementById("role").value
+  };
+
+  fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message || "User berhasil diupdate");
+    window.location.href = "manage_user.html";
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Gagal update user");
+  });
+});
+
+function back() {
+  window.location.href = "manage_user.html";
+}
+</script>
+
+</body>
+</html>
